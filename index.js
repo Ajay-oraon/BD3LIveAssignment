@@ -67,31 +67,49 @@ app.get("/tasks/pending", (req, res) => {
   res.json(result);
 });
 
-// 
+//sort tasks by Priority
+app.get("/tasks/sort/by-priority", (req, res) => {
+  const priorityOrder = { high: 1, medium: 2, low: 3 };
+
+  const sortedTasks = tasks.slice().sort((a, b) => {
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+
+  res.json(sortedTasks);
+});
 
 //udpdate task status
-function updateTaskById(tasks,id,status){
-    const task= tasks.find((task)=>task.id===id)
-    task.status=status
-    return task;
+function updateTaskById(tasks, id, status) {
+  const task = tasks.find((task) => task.id === id);
+  task.status = status;
+  return task;
 }
 
-app.post("/tasks/:id/status",(req,res)=>{
-    const id= parseInt(req.params.id);
-    const status= req.query.status;
-    const result= updateTaskById(tasks,id,status)
+app.post("/tasks/:id/status", (req, res) => {
+  const id = parseInt(req.params.id);
+  const status = req.query.status;
+  const result = updateTaskById(tasks, id, status);
 
-    res.json({updatedTask:result})
+  res.json({ updatedTask: result });
 });
 
 //Sort Tasks by Project Size:
 
-// app.get("/projects/sort/by-task-size",(req,res)=>{
-//     let sortedProject;
-//     for(let i=0;i<tasks.length;i++){
-//         if()
-//     }
-// })
+app.get("/projects/sort/by-task-size", (req, res) => {
+  // 1. Create an object to count tasks per project
+  const projectCounts = {};
+  tasks.forEach((task) => {
+    projectCounts[task.project] = (projectCounts[task.project] || 0) + 1;
+  });
+
+  // 2. Create an array of [project, count] pairs
+  const projectEntries = Object.entries(projectCounts);
+
+  // 3. Sort the array by count (descending)
+  const sortedProjects = projectEntries.sort((a, b) => b[1] - a[1]);
+
+  res.json(sortedProjects);
+});
 
 function validateId(id) {
   return tasks.find((task) => task.id === id);
